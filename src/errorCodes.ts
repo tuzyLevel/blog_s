@@ -1,0 +1,29 @@
+import type { ErrorMsg } from "@/index";
+
+//code : message
+
+const ErrorCodes: { [msg in ErrorMsg]?: number } = {
+  //400~
+  //400 bad request
+  NO_AUTH: 401,
+  INVALID_ACCESS_TOKEN: 4011,
+  ALREADY_EXIST: 4012,
+  NOT_EXPIRED: 4013,
+
+  NOT_FOUND: 404,
+  FAILED_FIND_USER: 4041,
+  INCORRECT_PASSWORD: 4042,
+  TOKEN_ISSUE: 4043,
+  NO_INPUT_DATA: 4044,
+  NOT_ENOUGH_HEADER_DATA: 4045,
+
+  //500~
+  FAILED_INSERT_DATA: 5001,
+  FAILED_CREATE: 5002,
+  FAILED_FIND_DATA: 5003,
+  FAILED_DELETE_DATA: 5004,
+  FAILED_DELETE_DATA_REMAIN_POSTING: 50041,
+  FAILED_DELETE_DATA_REMAIN_CHILD_BOARD: 50042,
+};
+
+export default ErrorCodes;
