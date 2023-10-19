@@ -5,7 +5,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { getErrorResult, getSuccessResult } from "../../utils/messages";
 
 import sequelize from "../../models/index";
-import { Sequelize } from "sequelize";
+import { Sequelize, Op } from "sequelize";
 
 export const writePosting = async (req: Request, res: Response) => {
   //board, title, content
@@ -117,28 +117,33 @@ export const modifyPosting = (req: Request, res: Response) => {
 };
 
 export const deletePosting = async (req: Request, res: Response) => {
-  let { id: stringId } = req.params;
-  const id = parseInt(stringId);
-  if (!stringId || isNaN(id)) {
-    return res.send(getErrorResult("NO_INPUT_DATA", "Need number posting id"));
+  const { ids } = req.body;
+
+  if (!ids || ids.length <= 0 || !(ids instanceof Array)) {
+    return res.send(
+      getErrorResult("NO_INPUT_DATA", "Need number posting id list")
+    );
   }
 
   const t = await sequelize.transaction();
   try {
     const Posting = sequelize.models.Posting;
 
-    const postingRecord = await Posting.findOne({ where: { id } });
-    console.log(postingRecord);
-    if (!postingRecord) {
+    const postingRecords = await Posting.findAll({
+      where: { id: { [Op.or]: ids } },
+    });
+
+    if (postingRecords.length <= 0) {
       return res.send(getErrorResult("NOT_FOUND", "Not exists posting data"));
     }
 
-    const DPosting = sequelize.models.D_Posting;
-    await DPosting.create({
-      ...postingRecord.dataValues,
-      updatedAt: Sequelize.fn("NOW"),
+    const data = postingRecords.map((record) => {
+      return { ...record.dataValues, updatedAt: Sequelize.fn("NOW") };
     });
-    await Posting.destroy({ where: { id } });
+
+    const DPosting = sequelize.models.D_Posting;
+    await DPosting.bulkCreate(data);
+    await Posting.destroy({ where: { id: { [Op.or]: ids } } });
     await t.commit();
     res.send(getSuccessResult(200, "Posting delete succeeded"));
   } catch (e) {

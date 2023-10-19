@@ -31,7 +31,7 @@ const route = {
   writePosting: "/",
   modifyPosting: "/id",
   readPosting: "/:id",
-  deletePosting: "/:id",
+  deletePosting: "/",
   upload: "/upload/image",
 
   test: "/test",
